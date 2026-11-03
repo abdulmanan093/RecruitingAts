@@ -369,9 +369,6 @@ DOMAIN_DECISIONS.local.md
 ```
 
 Copy from a teammate or recreate locally if missing. **Never commit it.**
-
----
-
 ## Project conventions
 
 1. **Business rules in C# services** (when added) — not only in React.  
