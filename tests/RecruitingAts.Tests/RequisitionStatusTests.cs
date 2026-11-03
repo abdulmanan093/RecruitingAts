@@ -13,6 +13,34 @@ namespace RecruitingAts.Tests;
 public class RequisitionStatusTests
 {
     [Fact]
+    public async Task Republish_ResumesHeldJob_AndRecordsActor()
+    {
+        var (db, service, manager, reqId) = await CreatePublishedAsync();
+        await service.ChangeStatusAsync(reqId, RequisitionStatuses.OnHold, "Budget review", manager);
+
+        var result = await service.RepublishAsync(reqId, manager);
+
+        Assert.Null(result.Error);
+        Assert.Equal(RequisitionStatuses.Published, result.Detail!.Status);
+        Assert.Null(result.Detail.StatusReason);
+        Assert.Contains(db.AuditLogs, log => log.Action == "Republished"
+            && log.EntityId == reqId.ToString()
+            && log.UserId == manager.FindFirstValue(ClaimTypes.NameIdentifier));
+    }
+
+    [Fact]
+    public async Task Republish_DoesNotBypassApprovalOrTeamScope()
+    {
+        var (db, service, manager, reqId) = await CreateDraftOwnedAsync();
+        Assert.NotNull((await service.RepublishAsync(reqId, manager)).Error);
+        db.Requisitions.Single(r => r.RequisitionId == reqId).Status = RequisitionStatuses.OnHold;
+        await db.SaveChangesAsync();
+        var outsider = TestFixture.User("outsider", Permissions.RequisitionsManage);
+        Assert.NotNull((await service.RepublishAsync(reqId, outsider)).Error);
+        Assert.Equal(RequisitionStatuses.OnHold, db.Requisitions.Single(r => r.RequisitionId == reqId).Status);
+    }
+
+    [Fact]
     public async Task Reject_WithoutReason_Fails()
     {
         var (db, service, approver, reqId) = await CreatePendingAsync();

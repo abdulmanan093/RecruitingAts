@@ -216,3 +216,14 @@ body input:is([type=checkbox], [type=radio]) { accent-color: #087d6d; }
   body .btn, body .field :is(input, select, textarea), .management-page .management-link { transition: none; }
   .management-page .management-link:hover { transform: none; }
 }
+/* Keep the password reveal control inside the input without submitting the form. */
+.login-password { position: relative; }
+body .login-card .field .login-password input { padding-right: 3.2rem; }
+.login-password input::-ms-reveal { display: none; }
+.login-password-toggle {
+  position: absolute; right: .4rem; top: 50%; transform: translateY(-50%);
+  display: grid; place-items: center; width: 36px; height: 36px;
+  border: 0; border-radius: 8px; background: transparent; color: #52677a; cursor: pointer;
+}
+.login-password-toggle:hover { background: #e7f4ef; color: #087d6d; }
+.login-password-toggle:focus-visible { outline: 2px solid #087d6d; outline-offset: 1px; }

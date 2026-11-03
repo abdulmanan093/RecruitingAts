@@ -2,9 +2,9 @@ name: Test and deploy Recruiting ATS
 
 on:
   push:
-    branches: [deploy/monsterasp]
+    branches: [main]
   pull_request:
-    branches: [deploy/monsterasp]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Requisition tests failed.' }
 
       - name: Publish API and React together
-        run: dotnet publish backend/RecruitingAts.Api.csproj -c Release -r win-x86 --self-contained false -o publish
+        run: dotnet publish backend/RecruitingAts.Api.csproj -c Release --self-contained false -o publish
 
       - name: Check frontend
         working-directory: frontend
@@ -53,9 +53,9 @@ jobs:
             if (!(Test-Path "publish/$file")) { throw "Publish output is missing $file" }
           }
 
-      # Pull requests only build/test. Only this deployment branch updates the site.
+      # Pull requests only build/test. Pushes to main update the live website.
       - name: Deploy to MonsterASP.NET
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/deploy/monsterasp'
+        if: vars.MONSTERASP_DEPLOY_ENABLED == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           WEBSITE_NAME: ${{ secrets.WEBSITE_NAME }}
@@ -78,7 +78,7 @@ jobs:
             "-dest:contentPath='$env:WEBSITE_NAME',computerName='$endpoint',userName='$env:SERVER_USERNAME',password='$env:SERVER_PASSWORD',authType='Basic',includeAcls='False'"
             '-enableRule:AppOffline'
             '-enableRule:DoNotDeleteRule'
-            '-skip:Directory=App_Data'
+            '-skip:objectName=dirPath,absolutePath=App_Data'
             '-disableLink:AppPoolExtension'
             '-disableLink:ContentExtension'
             '-disableLink:CertificateExtension'
@@ -87,8 +87,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'MonsterASP.NET deployment failed. Check the deploy log.' }
 
       - name: Check live API
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/deploy/monsterasp'
+        if: vars.MONSTERASP_DEPLOY_ENABLED == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         shell: pwsh
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
         run: |
-          $health = Invoke-RestMethod 'https://recruiting-ats.runasp.net/api/health' -TimeoutSec 60
+          $health = Invoke-RestMethod ($env:SITE_URL.TrimEnd('/') + '/api/health') -TimeoutSec 60
           if ($health.status -ne 'ok') { throw 'The deployed API health check failed.' }

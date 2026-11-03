@@ -1,6 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { getHealth } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/shared'
 
@@ -21,16 +20,10 @@ export function LoginPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('recruiter@demo.local')
   const [password, setPassword] = useState('Pass123!')
+  const [showPassword, setShowPassword] = useState(false)
   const [fullName, setFullName] = useState('Demo Recruiter')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [health, setHealth] = useState('checking…')
-
-  useEffect(() => {
-    getHealth()
-      .then((h) => setHealth(`${h.status} — ${h.service}`))
-      .catch(() => setHealth('unreachable (is the API running?)'))
-  }, [])
 
   if (!loading && user) {
     return <Navigate to={from} replace />
@@ -58,7 +51,6 @@ export function LoginPage() {
           Recruiting ATS
           <small>Sign in</small>
         </h1>
-        <p className="muted">API health: {health}</p>
 
         <div className="tabs">
           <button
@@ -110,16 +102,33 @@ export function LoginPage() {
               required
             />
           </label>
-          <label className="field">
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </label>
+          <div className="field">
+            <label htmlFor="login-password">Password</label>
+            <div className="login-password">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="login-password-toggle"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                  {showPassword && <path d="m3 3 18 18" />}
+                </svg>
+              </button>
+            </div>
+          </div>
           {error ? <p className="error">{error}</p> : null}
           <Button type="submit" variant="primary" disabled={busy}>
             {busy ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}

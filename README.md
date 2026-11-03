@@ -1,5 +1,13 @@
 # Recruiting ATS
 
+Personal deployment repository: https://github.com/abdulmanan093/RecruitingAts
+
+The `main` branch contains the combined ASP.NET Core API and React frontend. A push to `main` runs the backend tests, builds both parts, and publishes the result to https://recruiting-ats.runasp.net through GitHub Actions and MonsterASP.NET WebDeploy. Pull requests build and test without deploying.
+
+Publishing credentials are stored as encrypted GitHub Actions secrets (`WEBSITE_NAME`, `SERVER_COMPUTER_NAME`, `SERVER_USERNAME`, `SERVER_PASSWORD`). The website URL and deployment switch use the `SITE_URL` and `MONSTERASP_DEPLOY_ENABLED` repository variables. Database connection settings remain in the hosting account; uploaded resumes in `App_Data` are preserved during deployment.
+
+The original project brief is in `docs/Intern_Project_Recruiting_ATS_dotnet.pdf`. Personal local notes, archived copies, build output and deployment credentials are excluded from Git. Existing team commit history is retained for attribution.
+
 Team internship project: a simplified **Applicant Tracking System** for managing hiring from **job requisition → talent pool → pipeline → interviews**.
 
 This repo is the shared starting point. Read this document before writing features.

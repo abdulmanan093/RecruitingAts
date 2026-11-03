@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './auth/RequireAuth'
+import { RequirePermission } from './auth/RequirePermission'
+import { Permissions } from './api/client'
 import { AppShell } from './layout/AppShell'
 import { CompensationAuditPage } from './pages/audit/CompensationAuditPage'
 import { HomePage } from './pages/HomePage'
@@ -26,15 +28,15 @@ export function AppRoutes() {
         }
       >
         <Route index element={<HomePage />} />
-        <Route path="requisitions" element={<RequisitionsListPage />} />
-        <Route path="requisitions/:id" element={<RequisitionDetailPage />} />
-        <Route path="pool" element={<TalentPoolPage />} />
-        <Route path="pool/:id" element={<CandidateDetailPage />} />
-        <Route path="pipeline" element={<PipelineBoardPage />} />
-        <Route path="interviews" element={<MyInterviewsPage />} />
-        <Route path="interviews/schedule" element={<ScheduleInterviewPage />} />
-        <Route path="stages" element={<StagesAdminPage />} />
-        <Route path="audit" element={<CompensationAuditPage />} />
+        <Route path="requisitions" element={<RequirePermission anyOf={[Permissions.RequisitionsManage, Permissions.RequisitionsViewAll]}><RequisitionsListPage /></RequirePermission>} />
+        <Route path="requisitions/:id" element={<RequirePermission anyOf={[Permissions.RequisitionsManage, Permissions.RequisitionsViewAll]}><RequisitionDetailPage /></RequirePermission>} />
+        <Route path="pool" element={<RequirePermission anyOf={[Permissions.PoolView, Permissions.CandidatesManage, Permissions.ApplicationsManage]}><TalentPoolPage /></RequirePermission>} />
+        <Route path="pool/:id" element={<RequirePermission anyOf={[Permissions.PoolView]}><CandidateDetailPage /></RequirePermission>} />
+        <Route path="pipeline" element={<RequirePermission anyOf={[Permissions.ApplicationsManage]}><PipelineBoardPage /></RequirePermission>} />
+        <Route path="interviews" element={<RequirePermission anyOf={[Permissions.InterviewsFeedbackAdd, Permissions.InterviewsSchedule]}><MyInterviewsPage /></RequirePermission>} />
+        <Route path="interviews/schedule" element={<RequirePermission anyOf={[Permissions.InterviewsSchedule]}><ScheduleInterviewPage /></RequirePermission>} />
+        <Route path="stages" element={<RequirePermission anyOf={[Permissions.StagesManage]}><StagesAdminPage /></RequirePermission>} />
+        <Route path="audit" element={<RequirePermission anyOf={[Permissions.CompensationView]}><CompensationAuditPage /></RequirePermission>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

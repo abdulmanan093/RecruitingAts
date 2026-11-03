@@ -12,6 +12,7 @@ import {
   holdRequisition,
   Permissions,
   publishRequisition,
+  republishRequisition,
   rejectRequisition,
   removeRequisitionTeamMember,
   submitRequisition,
@@ -28,6 +29,7 @@ import type { RequisitionDetail } from '../../types/domain'
 import type { EmployeeListItem } from '../../types/domain'
 import { Link } from 'react-router-dom'
 import '../management.css'
+import { managementError } from '../managementHelpers'
 
 /** Owner: Amina (+ team panel: Abdul-Manan) */
 export function RequisitionDetailPage() {
@@ -253,14 +255,17 @@ export function RequisitionDetailPage() {
               setActionError(null)
 
               try {
-                await approveRequisition(id)
-                const refreshed = await getRequisition(id)
-                setRequisition(refreshed)
+                const updated = await approveRequisition(id)
+                setRequisition(updated)
                 setActionMessage('Requisition approved.')
               } catch (cause) {
                 if (axios.isAxiosError<{ message?: string }>(cause)) {
                   setActionError(
-                    cause.response?.data?.message ?? 'Unable to approve the requisition.',
+                    cause.response?.status === 403
+                      ? 'Your current account cannot approve requisitions. Please sign out and sign in as Admin.'
+                      : cause.response?.status === 401
+                        ? 'Please sign in again before approving the requisition.'
+                        : cause.response?.data?.message ?? 'Unable to approve the requisition. Please try again.',
                   )
                 } else if (cause instanceof Error) {
                   setActionError(cause.message)
@@ -308,6 +313,20 @@ export function RequisitionDetailPage() {
               setHoldValidationError(null)
               setActionError(null)
               setHoldOpen(true)
+            }}
+            onRepublish={async () => {
+              if (!id || publishPending) return
+              setPublishPending(true)
+              setActionMessage(null)
+              setActionError(null)
+              try {
+                setRequisition(await republishRequisition(id))
+                setActionMessage('Requisition is published again.')
+              } catch (cause) {
+                setActionError(managementError(cause))
+              } finally {
+                setPublishPending(false)
+              }
             }}
             onClose={() => {
               setCloseReason('')

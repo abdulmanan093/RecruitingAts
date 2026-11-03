@@ -43,3 +43,8 @@ DOMAIN_DECISIONS.local.md
 /backend/wwwroot/
 *.publishSettings
 
+# Archived copies and local setup instructions stay on this computer.
+/.local-archive/
+/Run-Local.ps1
+/Azure-F1-Deployment-Guide.local.pdf
+

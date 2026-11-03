@@ -107,6 +107,14 @@ namespace RecruitingAts.Api.Controllers
             return Ok(detail);
         }
 
+        [HttpPost("{id:guid}/republish")]
+        [Authorize(Policy = "REQUISITIONS.MANAGE")]
+        public async Task<IActionResult> Republish(Guid id, CancellationToken cancellationToken)
+        {
+            var (detail, error) = await _requisitionService.RepublishAsync(id, User, cancellationToken);
+            return error is null ? Ok(detail) : BadRequest(new { message = error });
+        }
+
         [HttpPost("{id:guid}/hold")]
         [Authorize(Policy = "REQUISITIONS.MANAGE")]
         public async Task<IActionResult> Hold(Guid id, [FromBody] StatusReasonRequest request, CancellationToken cancellationToken)

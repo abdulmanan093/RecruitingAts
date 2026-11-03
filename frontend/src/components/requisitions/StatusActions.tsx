@@ -86,8 +86,8 @@ export function StatusActions({
       ) : null}
       {canManage && status === 'OnHold' ? (
         <>
-          <Button variant="primary" onClick={onRepublish}>
-            Back to published
+          <Button variant="primary" onClick={onRepublish} disabled={publishPending}>
+            {publishPending ? 'Publishing…' : 'Back to published'}
           </Button>
           <Button onClick={onHold} disabled={holdPending}>
             {holdPending ? 'Holding…' : 'Hold'}

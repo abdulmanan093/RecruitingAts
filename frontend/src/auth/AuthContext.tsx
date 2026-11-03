@@ -40,6 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    // Another tab can sign in as a different demo account using the same cookie.
+    const refreshOnFocus = () => { void refresh() }
+    window.addEventListener('focus', refreshOnFocus)
+    return () => window.removeEventListener('focus', refreshOnFocus)
+  }, [refresh])
+
+  useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {

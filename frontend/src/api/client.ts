@@ -145,6 +145,11 @@ export async function publishRequisition(requisitionId: string) {
   return data
 }
 
+export async function republishRequisition(requisitionId: string) {
+  const { data } = await api.post<RequisitionDetail>(`/requisitions/${requisitionId}/republish`)
+  return data
+}
+
 export async function holdRequisition(requisitionId: string, reason: string) {
   const { data } = await api.post<RequisitionDetail>(`/requisitions/${requisitionId}/hold`, {
     reason,

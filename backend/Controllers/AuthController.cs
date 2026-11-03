@@ -97,6 +97,7 @@ public class AuthController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<ActionResult<UserDto>> Me()
     {
         var user = await _userManager.GetUserAsync(User);

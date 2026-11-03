@@ -63,6 +63,10 @@ builder.Services
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AppClaimsPrincipalFactory>();
 builder.Services.AddAppAuthorization();
 
+// Use current role permissions when validating an existing login cookie.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+    options.ValidationInterval = TimeSpan.Zero);
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "RecruitingAts.Auth";
@@ -75,12 +79,18 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        return Task.CompletedTask;
+        return context.Response.WriteAsJsonAsync(new
+        {
+            message = "Please sign in again."
+        });
     };
     options.Events.OnRedirectToAccessDenied = context =>
     {
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
+        return context.Response.WriteAsJsonAsync(new
+        {
+            message = "Your current account does not have permission to perform this action."
+        });
     };
 });
 
@@ -137,7 +147,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+if (!app.Environment.IsDevelopment())
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();
 
