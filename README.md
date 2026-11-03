@@ -423,8 +423,3 @@ Copy from a teammate or recreate locally if missing. **Never commit it.**
 
 ---
 
-## Questions?
-
-Ask the mentor for business-rule edge cases.  
-Use team chat / GitHub Issues for task assignment.  
-Keep unfinished domain decisions in `DOMAIN_DECISIONS.local.md` (local only).
